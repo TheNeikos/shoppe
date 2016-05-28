@@ -4,11 +4,13 @@
 extern crate iron;
 extern crate router;
 extern crate mount;
+extern crate logger;
 
 use iron::prelude::*;
 use iron::status;
 use router::Router;
 use mount::Mount;
+use logger::Logger;
 
 #[macro_use]
 mod macros;
@@ -25,8 +27,15 @@ fn main() {
 
     let mut mount = Mount::new();
     mount.mount("/", index_router)
-         .mount("/user/", user_router);
+         .mount("/users", user_router);
 
-    Iron::new(mount).http("0.0.0.0:3000").unwrap();
+    let (log_bef, log_aft) = Logger::new(None);
+
+    let mut log_chain = Chain::new(mount);
+    log_chain.link_before(log_bef);
+
+    log_chain.link_after(log_aft);
+
+    Iron::new(log_chain).http("0.0.0.0:3000").unwrap();
 }
 
