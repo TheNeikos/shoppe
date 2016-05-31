@@ -1,10 +1,12 @@
-#![feature(concat_idents)]
+#![feature(plugin)]
+#![plugin(maud_macros)]
 
 
 extern crate iron;
 extern crate router;
 extern crate mount;
 extern crate logger;
+extern crate maud;
 
 use iron::prelude::*;
 use iron::status;
@@ -15,6 +17,7 @@ use logger::Logger;
 #[macro_use]
 mod macros;
 mod controllers;
+mod views;
 mod error;
 
 fn main() {
@@ -35,7 +38,6 @@ fn main() {
     log_chain.link_before(log_bef);
 
     log_chain.link_after(log_aft);
-
     Iron::new(log_chain).http("0.0.0.0:3000").unwrap();
 }
 
