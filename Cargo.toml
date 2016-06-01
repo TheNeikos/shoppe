@@ -4,10 +4,23 @@ name = "shoppe"
 version = "0.1.0"
 
 [dependencies]
+bcrypt = "0.1.1"
+diesel = "0.6.2"
+dotenv = "0.8.0"
+dotenv_macros = "0.8.0"
 iron = "0.3.0"
+lazy_static = "0.2.1"
 logger = "0.0.3"
 maud = "0.8.1"
 maud_macros = "0.8.1"
 mount = "0.1.0"
+params = "0.2.2"
+r2d2 = "0.7.0"
+r2d2-diesel = "0.6.0"
 router = "0.1.1"
 time = "0.1.35"
+
+[dependencies.diesel_codegen]
+default-features = false
+features = ["nightly", "postgres"]
+version = "0.6.2"
