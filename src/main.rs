@@ -7,6 +7,7 @@ extern crate router;
 extern crate mount;
 extern crate logger;
 extern crate maud;
+extern crate params;
 
 use iron::prelude::*;
 use iron::status;

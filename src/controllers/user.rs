@@ -1,26 +1,49 @@
 
 use iron::prelude::*;
 use iron::status;
-use router::Router;
+use iron::headers::ContentType;
+use iron::modifiers::Redirect;
+use iron::Url;
+use params::Params;
 
 use error::NotImplemented;
-
-pub fn handler(req: &mut Request) -> IronResult<Response> {
-    let ref id = req.extensions.get::<Router>().unwrap().find("id").unwrap_or("/");
-    Ok(Response::with((status::Ok, *id)))
-}
-
+use views;
 
 pub fn index(req: &mut Request) -> IronResult<Response> {
     Err(IronError::new(NotImplemented::new(req), status::NotImplemented))
 }
 
 pub fn new(req: &mut Request) -> IronResult<Response> {
-    Err(IronError::new(NotImplemented::new(req), status::NotImplemented))
+    let mut resp = Response::with((status::Ok, views::user::new(None).unwrap()));
+    resp.headers.set(ContentType::html());
+    Ok(resp)
 }
 
 pub fn create(req: &mut Request) -> IronResult<Response> {
-    Err(IronError::new(NotImplemented::new(req), status::NotImplemented))
+    use params::{Params, Value};
+
+    let map = req.get_ref::<Params>().unwrap();
+
+    let username = match map.get("user_email") {
+        Some(&Value::String(ref name)) => Some(name),
+        _ => None
+    };
+
+    let password = match map.get("user_password") {
+        Some(&Value::String(ref pass)) => Some(pass),
+        _ => None
+    };
+
+    println!("{:#?}", map);
+
+    if username.is_none() || password.is_none() {
+        let mut resp = Response::with((status::Ok, views::user::new(Some((username, password))).unwrap()));
+        resp.headers.set(ContentType::html());
+        return Ok(resp);
+    }
+
+    // TODO: Add ccnfig for url?
+    return Ok(Response::with((Redirect(Url::parse("http://localhost:3000/").unwrap()),)))
 }
 
 pub fn show(req: &mut Request) -> IronResult<Response> {
