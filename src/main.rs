@@ -15,6 +15,7 @@ extern crate dotenv;
 #[macro_use] extern crate lazy_static;
 extern crate r2d2;
 extern crate r2d2_diesel;
+extern crate bcrypt;
 
 use iron::prelude::*;
 use iron::status;
@@ -42,7 +43,7 @@ fn main() {
     mount.mount("/", index_router)
          .mount("/users", user_router);
 
-    let (log_bef, log_aft) = Logger::new(None);
+    let (log_bef, log_aft) = Logger::new(Some(logger::format::Format::default()));
 
     let mut log_chain = Chain::new(mount);
     log_chain.link_before(log_bef);

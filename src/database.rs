@@ -17,6 +17,6 @@ lazy_static! {
     };
 }
 
-fn get_connection() -> r2d2::Pool<ConnectionManager<PgConnection>> {
+pub fn connection() -> r2d2::Pool<ConnectionManager<PgConnection>> {
     CONNECTION.clone()
 }

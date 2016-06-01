@@ -4,6 +4,7 @@ name = "shoppe"
 version = "0.1.0"
 
 [dependencies]
+bcrypt = "0.1.1"
 diesel = "0.6.2"
 dotenv = "0.8.0"
 dotenv_macros = "0.8.0"
