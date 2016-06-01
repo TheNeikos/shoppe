@@ -1,5 +1,7 @@
 #![feature(plugin)]
 #![plugin(maud_macros)]
+#![feature(custom_derive, custom_attribute)]
+#![plugin(diesel_codegen, dotenv_macros)]
 
 
 extern crate iron;
@@ -8,6 +10,11 @@ extern crate mount;
 extern crate logger;
 extern crate maud;
 extern crate params;
+#[macro_use] extern crate diesel;
+extern crate dotenv;
+#[macro_use] extern crate lazy_static;
+extern crate r2d2;
+extern crate r2d2_diesel;
 
 use iron::prelude::*;
 use iron::status;
@@ -17,9 +24,11 @@ use logger::Logger;
 
 #[macro_use]
 mod macros;
+mod database;
 mod controllers;
 mod views;
 mod error;
+mod models;
 
 fn main() {
     use controllers::user;
