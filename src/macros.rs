@@ -16,3 +16,17 @@ macro_rules! resource {
     }}
 }
 
+
+#[macro_export]
+macro_rules! template {
+    ($fun:expr) => {{
+        use error;
+        try!(match $fun {
+            ::std::result::Result::Ok(val) => ::std::result::Result::Ok(val),
+            ::std::result::Result::Err(err) => {
+                let e : error::TemplateError = ::std::convert::From::from(err);
+                ::std::result::Result::Err(e)
+            }
+        })
+    }}
+}
