@@ -60,7 +60,7 @@ pub fn index(users: &[User]) -> Result<String, ::std::fmt::Error> {
         }
     ));
 
-    try!(views::layout::application(&mut buffer, Cow::Borrowed("Register"), Cow::Borrowed(&partial[..])));
+    try!(views::layout::application(&mut buffer, Cow::Borrowed("Users"), Cow::Borrowed(&partial[..])));
 
     Ok(buffer)
 }
