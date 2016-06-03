@@ -19,13 +19,13 @@ pub fn index(req: &mut Request) -> IronResult<Response> {
     let user_list = users.limit(10).load::<models::user::User>(&*database::connection().get().unwrap())
         .expect("Error loading users");
 
-    let mut resp = Response::with((status::Ok, views::user::index(&user_list).unwrap()));
+    let mut resp = Response::with((status::Ok, template!(views::user::index(&user_list))));
     resp.headers.set(ContentType::html());
     Ok(resp)
 }
 
 pub fn new(req: &mut Request) -> IronResult<Response> {
-    let mut resp = Response::with((status::Ok, views::user::new(None).unwrap()));
+    let mut resp = Response::with((status::Ok, template!(views::user::new(None))));
     resp.headers.set(ContentType::html());
     Ok(resp)
 }
@@ -54,7 +54,7 @@ pub fn create(req: &mut Request) -> IronResult<Response> {
     let new_user = match models::user::NewUser::new(username, email, password) {
         Ok(new_user) => new_user,
         Err(err) => {
-            let mut resp = Response::with((status::Ok, views::user::new(Some(err)).unwrap()));
+            let mut resp = Response::with((status::Ok, template!(views::user::new(Some(err)))));
             resp.headers.set(ContentType::html());
             return Ok(resp);
         }
