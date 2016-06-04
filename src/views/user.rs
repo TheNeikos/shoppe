@@ -79,6 +79,11 @@ pub fn show(user: &User) -> Result<String, ::std::fmt::Error> {
         }
 
         a href=^(url!(format!("/users/{}/edit", user.id))) "Edit"
+
+        form method="post" action=^(format!("/users/{}", user.id)) {
+            input type="hidden" value="DELETE" name="_method" /
+            input type="submit" value="Delete" /
+        }
     ));
 
     try!(views::layout::application(&mut buffer, Cow::Owned(format!("User: {}", user.name)), Cow::Borrowed(&partial[..])));

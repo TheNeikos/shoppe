@@ -174,6 +174,33 @@ pub fn update(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn delete(req: &mut Request) -> IronResult<Response> {
-    Err(IronError::new(NotImplemented::new(req), status::NotImplemented))
+    use params::{Params, Value};
+    use models::schema::users;
+    use router::Router;
+
+    let id = match req.extensions.get::<Router>().unwrap().find("id") {
+        Some(t) => {
+            match t.parse::<_>() {
+                Ok(t) => t,
+                Err(e) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
+            }
+        }
+        None => {
+            return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")));
+        }
+    };
+
+    let user = match try!(models::user::find(id)) {
+        Some(u) => u,
+        None => {
+            let mut resp = Response::with(status::NotFound);
+            resp.headers.set(ContentType::html());
+            return Ok(resp)
+        }
+    };
+
+    try!(user.delete());
+
+    return Ok(Response::with((status::SeeOther, Redirect(url!("/users")))))
 }
 

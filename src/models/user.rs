@@ -46,6 +46,14 @@ impl User {
         diesel::update(users.filter(id.eq(self.id))).set(update)
             .execute(&*database::connection().get().unwrap()).map_err(|e| e.into())
     }
+
+    pub fn delete(self) -> Result<usize, error::DatabaseError> {
+        use diesel;
+        use diesel::prelude::*;
+        use models::schema::users::dsl::*;
+        diesel::delete(users.filter(id.eq(self.id)))
+            .execute(&*database::connection().get().unwrap()).map_err(|e| e.into())
+    }
 }
 
 #[changeset_for(users)]
