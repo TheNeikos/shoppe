@@ -1,6 +1,9 @@
 use bcrypt::{hash, DEFAULT_COST};
 
 use models::schema::users;
+use database;
+use models;
+use error;
 
 #[derive(Queryable)]
 pub struct User {
@@ -9,6 +12,7 @@ pub struct User {
     pub password_hash: String,
     pub name: String,
 }
+
 
 #[insertable_into(users)]
 pub struct NewUser<'a> {
@@ -79,6 +83,21 @@ impl<'a> NewUser<'a> {
             password_hash: password_hash,
         })
     }
+}
+
+pub fn find_all() -> Result<Vec<User>, error::DatabaseError> {
+    use diesel::prelude::*;
+    use models::schema::users::dsl::*;
+
+    users.get_results::<models::user::User>(&*database::connection().get().unwrap()).map_err(|e| e.into())
+}
+
+pub fn find(uid: i32) -> Result<Option<User>, error::DatabaseError> {
+    use diesel::prelude::*;
+    use models::schema::users::dsl::*;
+
+    users.limit(1).filter(id.eq(uid))
+         .get_result::<models::user::User>(&*database::connection().get().unwrap()).optional().map_err(|e| e.into())
 }
 
 

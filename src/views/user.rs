@@ -55,7 +55,7 @@ pub fn index(users: &[User]) -> Result<String, ::std::fmt::Error> {
 
         @for user in users {
             div class="user" {
-                ^user.name
+                a ^user.name
             }
         }
     ));

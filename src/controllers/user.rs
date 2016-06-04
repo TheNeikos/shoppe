@@ -7,17 +7,13 @@ use iron::Url;
 use params::Params;
 use diesel::{self, ExecuteDsl};
 
-use error::NotImplemented;
+use error::{self, NotImplemented};
 use views;
 use models;
 use database;
 
 pub fn index(req: &mut Request) -> IronResult<Response> {
-    use diesel::prelude::*;
-    use models::schema::users::dsl::*;
-
-    let user_list = users.limit(10).load::<models::user::User>(&*database::connection().get().unwrap())
-        .expect("Error loading users");
+    let user_list = try!(models::user::find_all());
 
     let mut resp = Response::with((status::Ok, template!(views::user::index(&user_list))));
     resp.headers.set(ContentType::html());
@@ -68,7 +64,25 @@ pub fn create(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn show(req: &mut Request) -> IronResult<Response> {
-    Err(IronError::new(NotImplemented::new(req), status::NotImplemented))
+    use router::Router;
+
+    let id = match req.extensions.get::<Router>().unwrap().find("id") {
+        Some(t) => {
+            match t.parse::<_>() {
+                Ok(t) => t,
+                Err(e) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
+            }
+        }
+        None => {
+            return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")));
+        }
+    };
+
+    let user = try!(models::user::find(id));
+
+    let mut resp = Response::with((status::Ok, template!(views::user::new(None))));
+    resp.headers.set(ContentType::html());
+    Ok(resp)
 }
 
 pub fn edit(req: &mut Request) -> IronResult<Response> {
