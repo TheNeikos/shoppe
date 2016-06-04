@@ -55,12 +55,29 @@ pub fn index(users: &[User]) -> Result<String, ::std::fmt::Error> {
 
         @for user in users {
             div class="user" {
-                a ^user.name
+                a.user-link href=^(url!(format!("/users/{}", user.id))) ^user.name
             }
         }
     ));
 
     try!(views::layout::application(&mut buffer, Cow::Borrowed("Users"), Cow::Borrowed(&partial[..])));
+
+    Ok(buffer)
+}
+
+pub fn show(user: &User) -> Result<String, ::std::fmt::Error> {
+    let mut buffer = String::new();
+    let mut partial = String::new();
+    try!(html!(partial,
+        h1 { ^user.name }
+
+        div.email {
+            "Email: "
+            ^user.email
+        }
+    ));
+
+    try!(views::layout::application(&mut buffer, Cow::Owned(format!("User: {}", user.name)), Cow::Borrowed(&partial[..])));
 
     Ok(buffer)
 }

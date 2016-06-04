@@ -78,9 +78,16 @@ pub fn show(req: &mut Request) -> IronResult<Response> {
         }
     };
 
-    let user = try!(models::user::find(id));
+    let user = match try!(models::user::find(id)) {
+        Some(u) => u,
+        None => {
+            let mut resp = Response::with(status::NotFound);
+            resp.headers.set(ContentType::html());
+            return Ok(resp)
+        }
+    };
 
-    let mut resp = Response::with((status::Ok, template!(views::user::new(None))));
+    let mut resp = Response::with((status::Ok, template!(views::user::show(&user))));
     resp.headers.set(ContentType::html());
     Ok(resp)
 }

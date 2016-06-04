@@ -47,6 +47,11 @@ macro_rules! database_try {
 #[macro_export]
 macro_rules! temp_redirect {
     ($url:expr) => {
-        (status::SeeOther, Redirect(Url::parse(&(String::from("http://localhost:3000") + $url)[..]).unwrap()))
+        (status::SeeOther, Redirect(url!($url)))
     }
+}
+
+#[macro_export]
+macro_rules! url {
+    ($url:expr) => {{use iron::Url; Url::parse(&(format!("http://localhost:3000{}", $url)[..])).unwrap() }}
 }
