@@ -30,6 +30,7 @@ mod views;
 mod error;
 mod models;
 mod logger;
+mod middleware;
 
 fn main() {
     use controllers::user;
@@ -45,6 +46,7 @@ fn main() {
 
     let mut log_chain = Chain::new(mount);
     log_chain.link_before(logger::Logger);
+    log_chain.link_before(middleware::MethodOverride);
 
     log_chain.link_after(logger::Logger);
     Iron::new(log_chain).http("0.0.0.0:3000").unwrap();
