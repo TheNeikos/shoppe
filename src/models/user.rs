@@ -1,4 +1,5 @@
 use bcrypt::{hash, DEFAULT_COST};
+use diesel::ExpressionMethods;
 
 use models::schema::users;
 use database;
@@ -13,6 +14,75 @@ pub struct User {
     pub name: String,
 }
 
+impl User {
+    fn verify_name(name: &str) -> Vec<&'static str> {
+        let mut ue = vec![];
+        if name.is_empty() {
+            ue.push("Username cannot be empty.");
+        }
+
+        // FIXME: This should check the graphemes instead of length...
+        if name.chars().count() > 20 {
+            ue.push("Username should be less than 20 characters")
+        }
+        return ue;
+    }
+
+    fn verify_email(email: &str) -> Vec<&'static str> {
+        let mut ue = vec![];
+        if email.is_empty() {
+            ue.push("Email cannot be empty");
+        }
+        if email.find('@').is_none() {
+            ue.push("A valid Email contains an @");
+        }
+        return ue;
+    }
+
+    pub fn update(&self, update: &UpdateUser) -> Result<usize, error::DatabaseError> {
+        use diesel;
+        use diesel::prelude::*;
+        use models::schema::users::dsl::*;
+        diesel::update(users.filter(id.eq(self.id))).set(update)
+            .execute(&*database::connection().get().unwrap()).map_err(|e| e.into())
+    }
+}
+
+#[changeset_for(users)]
+pub struct UpdateUser<'a> {
+    name: Option<&'a str>,
+    password_hash: Option<String>,
+}
+
+impl<'a> UpdateUser<'a> {
+    pub fn new<'b>(name: Option<&'b str>, mut password: Option<&'b str>) -> Result<UpdateUser<'b>, UserError> {
+        let mut ue = UserError::new();
+
+        if let Some(name) = name {
+            ue.name.append(&mut User::verify_name(name));
+        }
+
+        if let Some(pass) = password {
+            if pass.is_empty() {
+                password = None;
+            }
+        }
+
+        if ue.has_any_errors() {
+            return Err(ue);
+        }
+
+
+        let password_hash = password.map(|password| {
+            hash(password, DEFAULT_COST).expect("Could not hash password!")
+        });
+
+        Ok(UpdateUser {
+            name: name,
+            password_hash: password_hash,
+        })
+    }
+}
 
 #[insertable_into(users)]
 pub struct NewUser<'a> {
@@ -21,44 +91,20 @@ pub struct NewUser<'a> {
     name: &'a str,
 }
 
-#[derive(Debug)]
-pub struct UserError {
-    pub email: Vec<&'static str>,
-    pub password: Vec<&'static str>,
-    pub name: Vec<&'static str>,
-}
-
-impl UserError {
-    fn has_any_errors(&self) -> bool {
-        !(self.email.is_empty() && self.name.is_empty() && self.password.is_empty())
-    }
-}
-
 impl<'a> NewUser<'a> {
     pub fn new<'b>(name: Option<&'b str>, email: Option<&'b str>, password: Option<&'b str>)
         -> Result<NewUser<'b>, UserError>
     {
-        let mut ue = UserError { email: vec![], password: vec![], name: vec![] };
-        if let Some(name) = name {
-            if name.is_empty() {
-                ue.name.push("Username cannot be empty.");
-            }
+        let mut ue = UserError::new();
 
-            // FIXME: This should check the graphemes instead of length...
-            if name.chars().count() > 20 {
-                ue.name.push("Username should be less than 20 characters")
-            }
+        if let Some(name) = name {
+            ue.name.append(&mut User::verify_name(name));
         } else {
             ue.name.push("Username cannot be empty.");
         }
 
         if let Some(email) = email {
-            if email.is_empty() {
-                ue.email.push("Email cannot be empty");
-            }
-            if email.find('@').is_none() {
-                ue.email.push("A valid Email contains an @");
-            }
+            ue.email.append(&mut User::verify_email(email));
         } else {
             ue.email.push("Email cannot be empty.");
         }
@@ -84,6 +130,23 @@ impl<'a> NewUser<'a> {
         })
     }
 }
+
+#[derive(Debug)]
+pub struct UserError {
+    pub email: Vec<&'static str>,
+    pub password: Vec<&'static str>,
+    pub name: Vec<&'static str>,
+}
+
+impl UserError {
+    fn new() -> UserError {
+        UserError { email: vec![], password: vec![], name: vec![] }
+    }
+    fn has_any_errors(&self) -> bool {
+        !(self.email.is_empty() && self.name.is_empty() && self.password.is_empty())
+    }
+}
+
 
 pub fn find_all() -> Result<Vec<User>, error::DatabaseError> {
     use diesel::prelude::*;

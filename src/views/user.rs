@@ -53,6 +53,8 @@ pub fn index(users: &[User]) -> Result<String, ::std::fmt::Error> {
     try!(html!(partial,
         h1 { "Users" }
 
+        p a href=^(url!("/users/new")) "New User"
+
         @for user in users {
             div class="user" {
                 a.user-link href=^(url!(format!("/users/{}", user.id))) ^user.name
@@ -75,6 +77,8 @@ pub fn show(user: &User) -> Result<String, ::std::fmt::Error> {
             "Email: "
             ^user.email
         }
+
+        a href=^(url!(format!("/users/{}/edit", user.id))) "Edit"
     ));
 
     try!(views::layout::application(&mut buffer, Cow::Owned(format!("User: {}", user.name)), Cow::Borrowed(&partial[..])));
@@ -82,3 +86,40 @@ pub fn show(user: &User) -> Result<String, ::std::fmt::Error> {
     Ok(buffer)
 }
 
+pub fn edit(user: &User, errors: Option<UserError>) -> Result<String, ::std::fmt::Error> {
+    let mut buffer = String::new();
+    let mut partial = String::new();
+    try!(html!(partial,
+        h1 { "Edit User " ^(user.name) }
+        form method="post" action=^(format!("/users/{}", user.id)) {
+            div {
+                label for="user_name" "Name:"
+                input type="text" id="user_name" name="user_name" value=^user.name ""
+                @if let &Some(ref errors) = &errors {
+                    @for err in &errors.name {
+                        p class="error" ^err
+                    }
+                }
+            }
+            div {
+                label for="user_email" "Email:"
+                input type="text" id="user_email" disabled="disabled" value=^user.email ""
+            }
+            div {
+                label for="password" "Password:"
+                input type="password" id="password" name="user_password" ""
+                @if let &Some(ref errors) = &errors {
+                    @for err in &errors.password {
+                        p class="error" ^err
+                    }
+                }
+            }
+
+            input type="submit" /
+        }
+    ));
+
+    try!(views::layout::application(&mut buffer, Cow::Borrowed("Register"), Cow::Borrowed(&partial[..])));
+
+    Ok(buffer)
+}

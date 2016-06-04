@@ -11,6 +11,7 @@ macro_rules! resource {
         router.get("/:id",      $name::show);
         router.get("/:id/edit", $name::edit);
         router.put("/:id",      $name::update);
+        router.post("/:id",      $name::update);
         router.delete("/:id",   $name::delete);
         router
     }}
