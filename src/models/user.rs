@@ -147,7 +147,7 @@ pub struct UserError {
 }
 
 impl UserError {
-    fn new() -> UserError {
+    pub fn new() -> UserError {
         UserError { email: vec![], password: vec![], name: vec![] }
     }
     fn has_any_errors(&self) -> bool {
