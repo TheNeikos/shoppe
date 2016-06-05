@@ -5,7 +5,7 @@ use iron::headers::ContentType;
 
 use views;
 
-pub fn handler(req: &mut Request) -> IronResult<Response> {
+pub fn handler(_req: &mut Request) -> IronResult<Response> {
     let mut resp = Response::with((status::Ok, views::shared::root().unwrap()));
     resp.headers.set(ContentType::html());
     Ok(resp)

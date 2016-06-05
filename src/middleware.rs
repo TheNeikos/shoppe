@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use iron::prelude::*;
-use iron::{AfterMiddleware, BeforeMiddleware};
+use iron::BeforeMiddleware;
 use iron::method::Method;
 
 pub struct MethodOverride;
