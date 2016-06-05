@@ -12,8 +12,12 @@ pub fn application(mut data: &mut fmt::Write, title: Cow<str>, partial: Cow<str>
             }
 
             body {
-                div class = "body" {
+                div.content {
                     ^PreEscaped(partial)
+                }
+
+                div.footer {
+                    ^PreEscaped("Shoppe 2016 &copy;")
                 }
             }
         }
