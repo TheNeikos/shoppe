@@ -4,15 +4,14 @@ use iron::status;
 use iron::headers::ContentType;
 use iron::modifiers::Redirect;
 use iron::Url;
-use params::Params;
 use diesel::{self, ExecuteDsl};
 
-use error::{self, NotImplemented};
+use error::{self};
 use views;
 use models;
 use database;
 
-pub fn index(req: &mut Request) -> IronResult<Response> {
+pub fn index(_req: &mut Request) -> IronResult<Response> {
     let user_list = try!(models::user::find_all());
 
     let mut resp = Response::with((status::Ok, template!(views::user::index(&user_list))));
@@ -20,7 +19,7 @@ pub fn index(req: &mut Request) -> IronResult<Response> {
     Ok(resp)
 }
 
-pub fn new(req: &mut Request) -> IronResult<Response> {
+pub fn new(_req: &mut Request) -> IronResult<Response> {
     let mut resp = Response::with((status::Ok, template!(views::user::new(None))));
     resp.headers.set(ContentType::html());
     Ok(resp)
@@ -70,7 +69,7 @@ pub fn show(req: &mut Request) -> IronResult<Response> {
         Some(t) => {
             match t.parse::<_>() {
                 Ok(t) => t,
-                Err(e) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
+                Err(_) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
             }
         }
         None => {
@@ -93,13 +92,12 @@ pub fn show(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn edit(req: &mut Request) -> IronResult<Response> {
-    use params::{Params, Value};
     use router::Router;
     let id = match req.extensions.get::<Router>().unwrap().find("id") {
         Some(t) => {
             match t.parse::<_>() {
                 Ok(t) => t,
-                Err(e) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
+                Err(_) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
             }
         }
         None => {
@@ -123,7 +121,6 @@ pub fn edit(req: &mut Request) -> IronResult<Response> {
 
 pub fn update(req: &mut Request) -> IronResult<Response> {
     use params::{Params, Value};
-    use models::schema::users;
     use router::Router;
 
 
@@ -131,7 +128,7 @@ pub fn update(req: &mut Request) -> IronResult<Response> {
         Some(t) => {
             match t.parse::<_>() {
                 Ok(t) => t,
-                Err(e) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
+                Err(_) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
             }
         }
         None => {
@@ -174,15 +171,13 @@ pub fn update(req: &mut Request) -> IronResult<Response> {
 }
 
 pub fn delete(req: &mut Request) -> IronResult<Response> {
-    use params::{Params, Value};
-    use models::schema::users;
     use router::Router;
 
     let id = match req.extensions.get::<Router>().unwrap().find("id") {
         Some(t) => {
             match t.parse::<_>() {
                 Ok(t) => t,
-                Err(e) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
+                Err(_) => return Err(IronError::new(error::BadFormattingError::new(), temp_redirect!("/users/")))
             }
         }
         None => {

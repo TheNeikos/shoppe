@@ -17,10 +17,8 @@ extern crate r2d2_diesel;
 extern crate bcrypt;
 
 use iron::prelude::*;
-use iron::status;
 use router::Router;
 use mount::Mount;
-use logger::Logger;
 
 #[macro_use]
 mod macros;

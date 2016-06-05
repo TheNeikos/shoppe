@@ -1,10 +1,11 @@
+#![allow(dead_code)]
+
 use iron::prelude::*;
 use iron::status;
 
 use diesel;
 use std::error::Error;
 use std::fmt::{self, Debug};
-use std::convert::{Into, From};
 
 #[derive(Debug)]
 pub struct NotImplemented {
